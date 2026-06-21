@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+<meta name="theme-color" content="#2E7D32"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="ASU Faculty Hostel"/>
+<meta name="description" content="ASU Faculty Hostel check-in tracker for Assam Skill University"/>
+<title>ASU Faculty Hostel</title>
+<link rel="manifest" href="manifest.json"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:'Roboto','Segoe UI',sans-serif;background:#F5F5F5;min-height:100vh;max-width:480px;margin:0 auto;box-shadow:0 0 30px rgba(0,0,0,.15);}
+/* STATUS BAR */
+.status-bar{background:#1B5E20;color:#fff;display:flex;justify-content:space-between;padding:5px 14px;font-size:11px;letter-spacing:.4px;}
+/* APP BAR */
+.app-bar{background:#2E7D32;color:#fff;padding:13px 14px 11px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 6px rgba(0,0,0,.22);}
+.app-title{font-size:17px;font-weight:700;letter-spacing:.2px;}
+.app-sub{font-size:10px;opacity:.82;margin-top:2px;}
+.fee-badge{background:#1B5E20;border-radius:10px;padding:6px 11px;text-align:center;min-width:76px;}
+.fee-badge-amt{font-size:15px;font-weight:700;}
+.fee-badge-lbl{font-size:10px;opacity:.8;margin-top:1px;}
+/* TABS */
+.tab-row{display:flex;background:#fff;border-bottom:2px solid #E0E0E0;}
+.tab{flex:1;padding:10px 0;border:none;background:transparent;font-size:13px;font-weight:600;cursor:pointer;color:#757575;border-bottom:3px solid transparent;transition:color .2s;}
+.tab.active{color:#2E7D32;border-bottom:3px solid #2E7D32;}
+/* BODY */
+.body{padding:12px 11px 28px;overflow-y:auto;}
+/* MONTH NAV */
+.month-nav{display:flex;align-items:center;justify-content:space-between;background:#fff;border-radius:12px;padding:8px 11px;margin-bottom:9px;box-shadow:0 1px 4px rgba(0,0,0,.08);}
+.nav-btn{background:#E8F5E9;border:none;border-radius:8px;width:36px;height:36px;font-size:22px;color:#2E7D32;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center;line-height:1;}
+.month-name{font-size:17px;font-weight:700;color:#212121;text-align:center;}
+.year-lbl{font-size:12px;color:#757575;margin-top:1px;text-align:center;}
+/* LEGEND */
+.legend{display:flex;gap:14px;justify-content:center;margin-bottom:8px;font-size:11.5px;color:#555;}
+.legend-item{display:flex;align-items:center;gap:4px;}
+.dot{display:inline-block;width:12px;height:12px;border-radius:50%;}
+/* DAY HEADERS */
+.day-headers{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:4px;}
+.day-hdr{text-align:center;font-size:11px;font-weight:700;color:#616161;padding:4px 0;letter-spacing:.2px;}
+.day-hdr.sun{color:#E53935;}
+.day-hdr.sat{color:#1565C0;}
+/* CALENDAR GRID */
+.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+.cell{height:46px;border-radius:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid #E0E0E0;background:#fff;position:relative;transition:transform .1s;user-select:none;}
+.cell:active{transform:scale(.93);}
+.cell.empty{background:transparent;border:none;cursor:default;}
+.cell.checked{background:#2E7D32;border:2px solid #1B5E20;}
+.cell.today:not(.checked){background:#E3F2FD;border:2px solid #1976D2;}
+.cell.sun-day:not(.checked){color:#E53935;}
+.cell.sat-day:not(.checked){color:#1565C0;}
+.cell.checked .day-num{color:#fff;}
+.day-num{font-size:14px;font-weight:600;line-height:1;}
+.checkmark{font-size:9px;margin-top:2px;opacity:.9;color:#fff;}
+/* HINT */
+.hint{text-align:center;font-size:11px;color:#9E9E9E;margin-top:9px;margin-bottom:4px;}
+/* MONTH SUMMARY CARD */
+.month-summary{display:flex;justify-content:space-between;align-items:center;background:#E8F5E9;border-radius:10px;padding:10px 13px;margin-top:9px;border:1px solid #A5D6A7;}
+.month-summary-text{font-size:13px;color:#2E7D32;}
+.month-summary-fee{font-size:16px;font-weight:700;color:#1B5E20;}
+/* TOTAL CARD */
+.total-card{background:#2E7D32;color:#fff;border-radius:16px;padding:20px 18px 16px;margin-bottom:15px;text-align:center;box-shadow:0 4px 12px rgba(46,125,50,.3);}
+.total-lbl{font-size:11px;opacity:.85;letter-spacing:.5px;text-transform:uppercase;}
+.total-days{font-size:42px;font-weight:700;margin:7px 0 3px;}
+.total-days span{font-size:17px;font-weight:400;}
+.total-fee{font-size:27px;font-weight:700;}
+.total-rate{font-size:11px;opacity:.75;margin-top:4px;}
+/* EMPTY STATE */
+.empty-state{text-align:center;padding:40px 20px;color:#9E9E9E;}
+.empty-state .icon{font-size:48px;}
+.empty-state p{margin-top:8px;font-size:14px;}
+.empty-state small{font-size:12px;color:#BDBDBD;}
+/* MONTH CARD */
+.month-card{background:#fff;border-radius:12px;padding:12px 13px;margin-bottom:9px;box-shadow:0 1px 4px rgba(0,0,0,.08);}
+.month-card-hdr{display:flex;justify-content:space-between;align-items:center;}
+.month-card-title{font-size:15px;font-weight:700;color:#212121;}
+.month-card-fee{font-size:16px;font-weight:700;color:#2E7D32;}
+.month-card-nights{font-size:12px;color:#757575;margin-top:2px;margin-bottom:7px;}
+.chips{display:flex;flex-wrap:wrap;gap:5px;}
+.chip{background:#E8F5E9;color:#1B5E20;border-radius:6px;padding:3px 8px;font-size:12px;font-weight:600;border:1px solid #A5D6A7;}
+/* CLEAR BTN */
+.clear-btn{display:block;width:100%;padding:12px;margin-top:15px;background:#FFEBEE;color:#C62828;border:1px solid #FFCDD2;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;}
+</style>
+</head>
+<body>
+
+<div class="status-bar">
+  <span id="clock">--:--</span>
+  <span>▲ ◉ ⬛</span>
+</div>
+
+<div class="app-bar">
+  <div>
+    <div class="app-title">ASU Faculty Hostel</div>
+    <div class="app-sub">Assam Skill University, Mangaldoi</div>
+  </div>
+  <div class="fee-badge">
+    <div class="fee-badge-amt" id="hdr-fee">₹0</div>
+    <div class="fee-badge-lbl" id="hdr-days">0d stay</div>
+  </div>
+</div>
+
+<div class="tab-row">
+  <button class="tab active" onclick="switchTab('calendar')">📅 Calendar</button>
+  <button class="tab" onclick="switchTab('summary')">🧾 Summary</button>
+</div>
+
+<div class="body" id="tab-calendar">
+  <div class="month-nav">
+    <button class="nav-btn" onclick="changeMonth(-1)">‹</button>
+    <div>
+      <div class="month-name" id="month-name">—</div>
+      <div class="year-lbl" id="year-lbl">—</div>
+    </div>
+    <button class="nav-btn" onclick="changeMonth(1)">›</button>
+  </div>
+
+  <div class="legend">
+    <span class="legend-item"><span class="dot" style="background:#2E7D32"></span> Stayed</span>
+    <span class="legend-item"><span class="dot" style="background:#E3F2FD;border:1px solid #90CAF9"></span> Today</span>
+    <span class="legend-item"><span class="dot" style="background:#fff;border:1px solid #ddd"></span> Not in</span>
+  </div>
+
+  <div class="day-headers">
+    <div class="day-hdr sun">Sun</div>
+    <div class="day-hdr">Mon</div>
+    <div class="day-hdr">Tue</div>
+    <div class="day-hdr">Wed</div>
+    <div class="day-hdr">Thu</div>
+    <div class="day-hdr">Fri</div>
+    <div class="day-hdr sat">Sat</div>
+  </div>
+
+  <div class="grid" id="calendar-grid"></div>
+  <div class="hint">Tap a date to mark / unmark your stay</div>
+  <div id="month-summary-bar"></div>
+</div>
+
+<div class="body" id="tab-summary" style="display:none">
+  <div class="total-card">
+    <div class="total-lbl">Total Stay Duration</div>
+    <div class="total-days" id="sum-days">0 <span>nights</span></div>
+    <div class="total-fee" id="sum-fee">₹0</div>
+    <div class="total-rate">@ ₹200 / night</div>
+  </div>
+  <div id="sum-list"></div>
+</div>
+
+<script>
+const RATE = 200;
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const today = new Date();
+let viewYear = today.getFullYear();
+let viewMonth = today.getMonth();
+let checkedDates = loadDates();
+
+function loadDates(){
+  try{ return new Set(JSON.parse(localStorage.getItem('asu_dates')||'[]')); }
+  catch(e){ return new Set(); }
+}
+function saveDates(){
+  try{ localStorage.setItem('asu_dates', JSON.stringify([...checkedDates])); }catch(e){}
+}
+
+function dateKey(y,m,d){ return y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0'); }
+function todayKey(){ return dateKey(today.getFullYear(),today.getMonth(),today.getDate()); }
+
+function updateHeader(){
+  const n = checkedDates.size;
+  document.getElementById('hdr-fee').textContent = '₹'+( n*RATE).toLocaleString();
+  document.getElementById('hdr-days').textContent = n+'d stay';
+}
+
+function renderCalendar(){
+  document.getElementById('month-name').textContent = MONTHS[viewMonth];
+  document.getElementById('year-lbl').textContent = viewYear;
+  const firstDay = new Date(viewYear, viewMonth, 1).getDay();
+  const daysInMonth = new Date(viewYear, viewMonth+1, 0).getDate();
+  const tKey = todayKey();
+  let html = '';
+  for(let i=0;i<firstDay;i++) html += '<div class="cell empty"></div>';
+  for(let d=1;d<=daysInMonth;d++){
+    const key = dateKey(viewYear,viewMonth,d);
+    const dow = (firstDay+d-1)%7;
+    const isChecked = checkedDates.has(key);
+    const isToday = key===tKey;
+    let cls = 'cell';
+    if(isChecked) cls+=' checked';
+    else if(isToday) cls+=' today';
+    if(dow===0) cls+=' sun-day';
+    if(dow===6) cls+=' sat-day';
+    html += `<div class="${cls}" onclick="toggle('${key}')">
+      <span class="day-num">${d}</span>
+      ${isChecked?'<span class="checkmark">✓</span>':''}
+    </div>`;
+  }
+  document.getElementById('calendar-grid').innerHTML = html;
+
+  // month summary bar
+  const mStays = [...checkedDates].filter(k=>{
+    const [y,m] = k.split('-').map(Number);
+    return y===viewYear && m===(viewMonth+1);
+  }).length;
+  const bar = document.getElementById('month-summary-bar');
+  bar.innerHTML = mStays>0
+    ? `<div class="month-summary">
+        <span class="month-summary-text">${MONTHS[viewMonth]}: <b>${mStays} night${mStays>1?'s':''}</b></span>
+        <span class="month-summary-fee">₹${(mStays*RATE).toLocaleString()}</span>
+       </div>` : '';
+}
+
+function renderSummary(){
+  const total = checkedDates.size;
+  document.getElementById('sum-days').innerHTML = total+' <span>night'+(total!==1?'s':'')+'</span>';
+  document.getElementById('sum-fee').textContent = '₹'+(total*RATE).toLocaleString();
+
+  if(total===0){
+    document.getElementById('sum-list').innerHTML =
+      '<div class="empty-state"><div class="icon">🗓️</div><p>No stays marked yet.</p><small>Go to Calendar and tap dates.</small></div>';
+    return;
+  }
+
+  // group by year-month
+  const groups = {};
+  for(const k of checkedDates){
+    const [y,m,d] = k.split('-').map(Number);
+    const gk = y+'-'+String(m).padStart(2,'0');
+    if(!groups[gk]) groups[gk]={year:y,month:m-1,days:[]};
+    groups[gk].days.push(d);
+  }
+  Object.values(groups).forEach(g=>g.days.sort((a,b)=>a-b));
+  const sorted = Object.entries(groups).sort(([a],[b])=>a.localeCompare(b));
+
+  let html = '';
+  for(const [,{year,month,days}] of sorted){
+    html += `<div class="month-card">
+      <div class="month-card-hdr">
+        <span class="month-card-title">${MONTHS[month]} ${year}</span>
+        <span class="month-card-fee">₹${(days.length*RATE).toLocaleString()}</span>
+      </div>
+      <div class="month-card-nights">${days.length} night${days.length>1?'s':''}</div>
+      <div class="chips">${days.map(d=>`<span class="chip">${String(d).padStart(2,'0')}</span>`).join('')}</div>
+    </div>`;
+  }
+  html += `<button class="clear-btn" onclick="clearAll()">🗑️ Clear All Stays</button>`;
+  document.getElementById('sum-list').innerHTML = html;
+}
+
+function toggle(key){
+  if(checkedDates.has(key)) checkedDates.delete(key);
+  else checkedDates.add(key);
+  saveDates();
+  updateHeader();
+  renderCalendar();
+}
+
+function changeMonth(dir){
+  viewMonth += dir;
+  if(viewMonth>11){viewMonth=0;viewYear++;}
+  if(viewMonth<0){viewMonth=11;viewYear--;}
+  renderCalendar();
+}
+
+function clearAll(){
+  if(confirm('Clear all marked stays?')){
+    checkedDates.clear();
+    saveDates();
+    updateHeader();
+    renderCalendar();
+    renderSummary();
+  }
+}
+
+function switchTab(t){
+  document.getElementById('tab-calendar').style.display = t==='calendar'?'block':'none';
+  document.getElementById('tab-summary').style.display = t==='summary'?'block':'none';
+  document.querySelectorAll('.tab').forEach((el,i)=>{
+    el.classList.toggle('active',(i===0&&t==='calendar')||(i===1&&t==='summary'));
+  });
+  if(t==='summary') renderSummary();
+}
+
+// Clock
+function updateClock(){
+  const now = new Date();
+  document.getElementById('clock').textContent =
+    now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+}
+updateClock();
+setInterval(updateClock,10000);
+
+// Init
+updateHeader();
+renderCalendar();
+  // Service Worker
+  if("serviceWorker" in navigator){
+    navigator.serviceWorker.register("sw.js").catch(()=>{});
+  }
+</script>
+</body>
+</html>
